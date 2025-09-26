@@ -1,5 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { MapPin, Clock, DollarSign, User } from "lucide-react";
+import { useState } from "react";
+import JobApplicationModal from "./JobApplicationModal";
+import { useToast } from "@/hooks/use-toast";
 
 interface JobCardProps {
   title: string;
@@ -13,6 +16,15 @@ interface JobCardProps {
 }
 
 const JobCard = ({ title, company, location, wage, type, description, skills, postedTime }: JobCardProps) => {
+  const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
+  const { toast } = useToast();
+
+  const handleSaveJob = () => {
+    toast({
+      title: "Job Saved!",
+      description: `${title} at ${company} has been saved to your favorites.`,
+    });
+  };
   return (
     <div className="bg-card border border-border rounded-lg p-6 shadow-card hover:shadow-elegant transition-all duration-300 hover:-translate-y-1">
       <div className="flex justify-between items-start mb-4">
@@ -50,13 +62,29 @@ const JobCard = ({ title, company, location, wage, type, description, skills, po
       </div>
       
       <div className="flex gap-3">
-        <Button variant="default" className="flex-1">
+        <Button 
+          variant="default" 
+          className="flex-1"
+          onClick={() => setIsApplicationModalOpen(true)}
+        >
           Apply Now
         </Button>
-        <Button variant="outline" size="icon">
+        <Button 
+          variant="outline" 
+          size="icon"
+          onClick={handleSaveJob}
+          title="Save Job"
+        >
           <DollarSign className="w-4 h-4" />
         </Button>
       </div>
+
+      <JobApplicationModal
+        isOpen={isApplicationModalOpen}
+        onClose={() => setIsApplicationModalOpen(false)}
+        jobTitle={title}
+        company={company}
+      />
     </div>
   );
 };

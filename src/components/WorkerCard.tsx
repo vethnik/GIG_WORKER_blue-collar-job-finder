@@ -1,5 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Star, MapPin, Phone, Mail } from "lucide-react";
+import { useState } from "react";
+import WorkerProfileModal from "./WorkerProfileModal";
+import { useToast } from "@/hooks/use-toast";
 
 interface WorkerCardProps {
   name: string;
@@ -26,6 +29,24 @@ const WorkerCard = ({
   phone,
   email
 }: WorkerCardProps) => {
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const { toast } = useToast();
+
+  const handleContact = (method: 'phone' | 'email') => {
+    if (method === 'phone' && phone) {
+      window.location.href = `tel:${phone}`;
+      toast({
+        title: "Opening Phone App",
+        description: `Calling ${name} at ${phone}`,
+      });
+    } else if (method === 'email' && email) {
+      window.location.href = `mailto:${email}?subject=Job Opportunity - SkillConnect`;
+      toast({
+        title: "Opening Email App",
+        description: `Sending email to ${name}`,
+      });
+    }
+  };
   return (
     <div className="bg-card border border-border rounded-lg p-6 shadow-card hover:shadow-elegant transition-all duration-300 hover:-translate-y-1">
       <div className="flex items-start space-x-4 mb-4">
@@ -87,20 +108,50 @@ const WorkerCard = ({
       </div>
       
       <div className="flex gap-2">
-        <Button variant="default" className="flex-1">
+        <Button 
+          variant="default" 
+          className="flex-1"
+          onClick={() => setIsProfileModalOpen(true)}
+        >
           View Profile
         </Button>
         {phone && (
-          <Button variant="outline" size="icon">
+          <Button 
+            variant="outline" 
+            size="icon"
+            onClick={() => handleContact('phone')}
+            title={`Call ${name}`}
+          >
             <Phone className="w-4 h-4" />
           </Button>
         )}
         {email && (
-          <Button variant="outline" size="icon">
+          <Button 
+            variant="outline" 
+            size="icon"
+            onClick={() => handleContact('email')}
+            title={`Email ${name}`}
+          >
             <Mail className="w-4 h-4" />
           </Button>
         )}
       </div>
+
+      <WorkerProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        worker={{
+          name,
+          trade,
+          location,
+          rating,
+          reviewCount,
+          skills,
+          yearsExperience,
+          phone,
+          email
+        }}
+      />
     </div>
   );
 };
