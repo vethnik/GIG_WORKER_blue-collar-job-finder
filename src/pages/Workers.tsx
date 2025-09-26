@@ -9,6 +9,18 @@ import Footer from "@/components/Footer";
 const Workers = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All Workers");
+
+  // Define filter categories
+  const categories = [
+    "All Workers",
+    "Carpenters", 
+    "Electricians",
+    "Masons",
+    "HVAC",
+    "Plumbers",
+    "Tile Installers"
+  ];
 
   // Mock worker data
   const workers = [
@@ -80,6 +92,28 @@ const Workers = () => {
     }
   ];
 
+  // Filter workers based on selected category and search term
+  const filteredWorkers = workers.filter(worker => {
+    const matchesCategory = selectedCategory === "All Workers" || 
+      worker.trade.toLowerCase().includes(selectedCategory.toLowerCase().slice(0, -1)) || // Remove 's' from plural
+      (selectedCategory === "Carpenters" && worker.trade.toLowerCase().includes("carpenter")) ||
+      (selectedCategory === "Electricians" && worker.trade.toLowerCase().includes("electrician")) ||
+      (selectedCategory === "Masons" && worker.trade.toLowerCase().includes("mason")) ||
+      (selectedCategory === "HVAC" && worker.trade.toLowerCase().includes("hvac")) ||
+      (selectedCategory === "Plumbers" && worker.trade.toLowerCase().includes("plumber")) ||
+      (selectedCategory === "Tile Installers" && worker.trade.toLowerCase().includes("tile"));
+    
+    const matchesSearch = searchTerm === "" || 
+      worker.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      worker.trade.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      worker.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    const matchesLocation = locationFilter === "" ||
+      worker.location.toLowerCase().includes(locationFilter.toLowerCase());
+    
+    return matchesCategory && matchesSearch && matchesLocation;
+  });
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -122,19 +156,29 @@ const Workers = () => {
 
           {/* Quick Filters */}
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm">All Workers</Button>
-            <Button variant="outline" size="sm">Carpenters</Button>
-            <Button variant="outline" size="sm">Electricians</Button>
-            <Button variant="outline" size="sm">Masons</Button>
-            <Button variant="outline" size="sm">HVAC</Button>
-            <Button variant="outline" size="sm">Plumbers</Button>
+            {categories.map((category) => (
+              <Button
+                key={category}
+                variant={selectedCategory === category ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedCategory(category)}
+                className="transition-all duration-200"
+              >
+                {category}
+              </Button>
+            ))}
           </div>
         </div>
 
         {/* Results Info */}
         <div className="flex justify-between items-center mb-6">
           <p className="text-muted-foreground">
-            {workers.length} skilled workers found
+            {filteredWorkers.length} skilled workers found
+            {selectedCategory !== "All Workers" && (
+              <span className="ml-2 text-primary">
+                • Filtered by {selectedCategory}
+              </span>
+            )}
           </p>
           <select className="bg-background border border-border rounded-md px-3 py-2 text-sm">
             <option>Highest Rated</option>
@@ -146,9 +190,27 @@ const Workers = () => {
 
         {/* Workers Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {workers.map((worker, index) => (
-            <WorkerCard key={index} {...worker} />
-          ))}
+          {filteredWorkers.length > 0 ? (
+            filteredWorkers.map((worker, index) => (
+              <WorkerCard key={index} {...worker} />
+            ))
+          ) : (
+            <div className="col-span-full text-center py-12">
+              <p className="text-muted-foreground text-lg mb-4">
+                No workers found matching your criteria
+              </p>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setSelectedCategory("All Workers");
+                  setSearchTerm("");
+                  setLocationFilter("");
+                }}
+              >
+                Clear Filters
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Load More */}

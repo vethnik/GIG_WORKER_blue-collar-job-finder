@@ -9,6 +9,17 @@ import Footer from "@/components/Footer";
 const Jobs = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All Jobs");
+
+  // Define filter categories
+  const categories = [
+    "All Jobs",
+    "Carpentry", 
+    "Electrical",
+    "Masonry",
+    "HVAC",
+    "Plumbing"
+  ];
 
   // Mock job data
   const jobs = [
@@ -54,6 +65,29 @@ const Jobs = () => {
     }
   ];
 
+  // Filter jobs based on selected category and search term
+  const filteredJobs = jobs.filter(job => {
+    const matchesCategory = selectedCategory === "All Jobs" || 
+      job.title.toLowerCase().includes(selectedCategory.toLowerCase()) ||
+      job.skills.some(skill => skill.toLowerCase().includes(selectedCategory.toLowerCase())) ||
+      (selectedCategory === "Carpentry" && (job.title.toLowerCase().includes("carpenter") || job.skills.some(s => s.toLowerCase().includes("carpenter") || s.toLowerCase().includes("framing")))) ||
+      (selectedCategory === "Electrical" && (job.title.toLowerCase().includes("electric") || job.skills.some(s => s.toLowerCase().includes("electric") || s.toLowerCase().includes("wiring")))) ||
+      (selectedCategory === "Masonry" && (job.title.toLowerCase().includes("mason") || job.skills.some(s => s.toLowerCase().includes("mason") || s.toLowerCase().includes("stone") || s.toLowerCase().includes("brick")))) ||
+      (selectedCategory === "HVAC" && (job.title.toLowerCase().includes("hvac") || job.skills.some(s => s.toLowerCase().includes("hvac")))) ||
+      (selectedCategory === "Plumbing" && (job.title.toLowerCase().includes("plumb") || job.skills.some(s => s.toLowerCase().includes("plumb"))));
+    
+    const matchesSearch = searchTerm === "" || 
+      job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    const matchesLocation = locationFilter === "" ||
+      job.location.toLowerCase().includes(locationFilter.toLowerCase());
+    
+    return matchesCategory && matchesSearch && matchesLocation;
+  });
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -96,19 +130,29 @@ const Jobs = () => {
 
           {/* Quick Filters */}
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm">All Jobs</Button>
-            <Button variant="outline" size="sm">Carpentry</Button>
-            <Button variant="outline" size="sm">Electrical</Button>
-            <Button variant="outline" size="sm">Masonry</Button>
-            <Button variant="outline" size="sm">HVAC</Button>
-            <Button variant="outline" size="sm">Plumbing</Button>
+            {categories.map((category) => (
+              <Button
+                key={category}
+                variant={selectedCategory === category ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedCategory(category)}
+                className="transition-all duration-200"
+              >
+                {category}
+              </Button>
+            ))}
           </div>
         </div>
 
         {/* Results Info */}
         <div className="flex justify-between items-center mb-6">
           <p className="text-muted-foreground">
-            Showing {jobs.length} jobs in your area
+            Showing {filteredJobs.length} jobs in your area
+            {selectedCategory !== "All Jobs" && (
+              <span className="ml-2 text-primary">
+                • Filtered by {selectedCategory}
+              </span>
+            )}
           </p>
           <select className="bg-background border border-border rounded-md px-3 py-2 text-sm">
             <option>Most Recent</option>
@@ -119,9 +163,27 @@ const Jobs = () => {
 
         {/* Job Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {jobs.map((job, index) => (
-            <JobCard key={index} {...job} />
-          ))}
+          {filteredJobs.length > 0 ? (
+            filteredJobs.map((job, index) => (
+              <JobCard key={index} {...job} />
+            ))
+          ) : (
+            <div className="col-span-full text-center py-12">
+              <p className="text-muted-foreground text-lg mb-4">
+                No jobs found matching your criteria
+              </p>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setSelectedCategory("All Jobs");
+                  setSearchTerm("");
+                  setLocationFilter("");
+                }}
+              >
+                Clear Filters
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Load More */}
