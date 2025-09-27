@@ -10,6 +10,7 @@ const Workers = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All Workers");
+  const [displayedWorkers, setDisplayedWorkers] = useState(6); // Initially show 6 workers
 
   // Define filter categories
   const categories = [
@@ -114,6 +115,14 @@ const Workers = () => {
     return matchesCategory && matchesSearch && matchesLocation;
   });
 
+  // Get workers to display based on current limit
+  const workersToShow = filteredWorkers.slice(0, displayedWorkers);
+  const hasMoreWorkers = filteredWorkers.length > displayedWorkers;
+
+  const loadMoreWorkers = () => {
+    setDisplayedWorkers(prev => Math.min(prev + 6, filteredWorkers.length));
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -191,7 +200,7 @@ const Workers = () => {
         {/* Workers Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredWorkers.length > 0 ? (
-            filteredWorkers.map((worker, index) => (
+            workersToShow.map((worker, index) => (
               <WorkerCard key={index} {...worker} />
             ))
           ) : (
@@ -205,6 +214,7 @@ const Workers = () => {
                   setSelectedCategory("All Workers");
                   setSearchTerm("");
                   setLocationFilter("");
+                  setDisplayedWorkers(6);
                 }}
               >
                 Clear Filters
@@ -214,11 +224,13 @@ const Workers = () => {
         </div>
 
         {/* Load More */}
-        <div className="text-center mt-12">
-          <Button variant="outline" size="lg">
-            Load More Workers
-          </Button>
-        </div>
+        {hasMoreWorkers && (
+          <div className="text-center mt-12">
+            <Button variant="outline" size="lg" onClick={loadMoreWorkers}>
+              Load More Workers ({filteredWorkers.length - displayedWorkers} remaining)
+            </Button>
+          </div>
+        )}
       </div>
 
       <Footer />
