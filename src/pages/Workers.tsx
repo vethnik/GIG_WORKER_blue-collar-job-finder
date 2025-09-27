@@ -90,6 +90,72 @@ const Workers = () => {
       yearsExperience: 9,
       phone: "(555) 678-9012",
       email: "robert@example.com"
+    },
+    {
+      name: "Jennifer Garcia",
+      trade: "Master Carpenter",
+      location: "Jersey City, NJ",
+      rating: 4.8,
+      reviewCount: 25,
+      skills: ["Kitchen Renovation", "Built-ins", "Hardwood Flooring", "Trim Work"],
+      yearsExperience: 11,
+      phone: "(555) 789-0123",
+      email: "jennifer@example.com"
+    },
+    {
+      name: "Michael Brown",
+      trade: "Licensed Electrician",
+      location: "Newark, NJ",
+      rating: 4.9,
+      reviewCount: 42,
+      skills: ["Solar Installation", "Smart Home Systems", "Industrial Wiring", "LED Conversion"],
+      yearsExperience: 16,
+      phone: "(555) 890-1234",
+      email: "michael@example.com"
+    },
+    {
+      name: "Lisa Anderson",
+      trade: "HVAC Specialist",
+      location: "Yonkers, NY",
+      rating: 4.7,
+      reviewCount: 28,
+      skills: ["Heat Pump Installation", "Ductwork", "Energy Efficiency", "Repair Service"],
+      yearsExperience: 13,
+      phone: "(555) 901-2345",
+      email: "lisa@example.com"
+    },
+    {
+      name: "Tony Martinez",
+      trade: "Stone Mason",
+      location: "White Plains, NY",
+      rating: 5.0,
+      reviewCount: 35,
+      skills: ["Outdoor Patios", "Fireplaces", "Retaining Walls", "Stone Veneer"],
+      yearsExperience: 18,
+      phone: "(555) 012-3456",
+      email: "tony@example.com"
+    },
+    {
+      name: "Rachel Davis",
+      trade: "Master Plumber",
+      location: "Hoboken, NJ",
+      rating: 4.8,
+      reviewCount: 29,
+      skills: ["Bathroom Renovation", "Kitchen Plumbing", "Leak Detection", "Drain Cleaning"],
+      yearsExperience: 12,
+      phone: "(555) 123-4567",
+      email: "rachel@example.com"
+    },
+    {
+      name: "Kevin O'Connor",
+      trade: "Tile Installer",
+      location: "New Rochelle, NY",
+      rating: 4.6,
+      reviewCount: 21,
+      skills: ["Mosaic Design", "Waterproofing", "Floor Heating", "Shower Installation"],
+      yearsExperience: 10,
+      phone: "(555) 234-5678",
+      email: "kevin@example.com"
     }
   ];
 
