@@ -55,6 +55,9 @@ const Navbar = () => {
           {/* Desktop Auth Buttons */}
           <div className="hidden md:flex items-center space-x-4">
             {user ? <>
+                <Link to="/profile">
+                  <Button variant="ghost">Profile</Button>
+                </Link>
                 <span className="text-sm text-muted-foreground">
                   Welcome, {user.user_metadata?.full_name || user.email}
                 </span>
@@ -92,6 +95,11 @@ const Navbar = () => {
               </a>
               <div className="pt-4 pb-2 space-y-2">
                 {user ? <>
+                    <Link to="/profile">
+                      <Button variant="ghost" className="w-full">
+                        Profile
+                      </Button>
+                    </Link>
                     <div className="px-3 py-2 text-sm text-muted-foreground">
                       Welcome, {user.user_metadata?.full_name || user.email}
                     </div>
