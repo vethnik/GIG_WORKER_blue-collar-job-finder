@@ -49,14 +49,19 @@ const Profile = () => {
   };
 
   const recentApplications = [
-    { id: 1, jobTitle: "Frontend Developer", company: "Tech Corp", status: "Pending", appliedDate: "2025-01-15" },
-    { id: 2, jobTitle: "UI/UX Designer", company: "Design Studio", status: "Interview", appliedDate: "2025-01-12" },
-    { id: 3, jobTitle: "React Developer", company: "StartupXYZ", status: "Rejected", appliedDate: "2025-01-10" },
+    { id: 1, jobTitle: "General Laborer", company: "BuildCorp Construction", status: "Pending", appliedDate: "2025-01-15" },
+    { id: 2, jobTitle: "Warehouse Worker", company: "Logistics Plus", status: "Interview", appliedDate: "2025-01-12" },
+    { id: 3, jobTitle: "House Cleaner", company: "CleanPro Services", status: "Rejected", appliedDate: "2025-01-10" },
+    { id: 4, jobTitle: "Moving Assistant", company: "QuickMove Solutions", status: "Accepted", appliedDate: "2025-01-08" },
   ];
 
   const savedJobs = [
-    { id: 1, title: "Senior Developer", company: "Innovation Inc", location: "Remote", salary: "$80k-100k" },
-    { id: 2, title: "Product Designer", company: "Creative Co", location: "New York", salary: "$70k-90k" },
+    { id: 1, title: "General Laborer", company: "BuildCorp Construction", location: "Downtown", salary: "$15-18/hour" },
+    { id: 2, title: "Warehouse Worker", company: "Logistics Plus", location: "Industrial District", salary: "$14-16/hour" },
+    { id: 3, title: "House Cleaner", company: "CleanPro Services", location: "Residential Areas", salary: "$12-15/hour" },
+    { id: 4, title: "Landscaping Helper", company: "GreenThumb Landscaping", location: "Various Locations", salary: "$13-17/hour" },
+    { id: 5, title: "Moving Assistant", company: "QuickMove Solutions", location: "City Wide", salary: "$16-20/hour" },
+    { id: 6, title: "Kitchen Helper", company: "Restaurant Group", location: "Food District", salary: "$11-14/hour" },
   ];
 
   const handleEditSubmit = () => {
