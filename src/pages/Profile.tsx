@@ -49,19 +49,21 @@ const Profile = () => {
   };
 
   const recentApplications = [
-    { id: 1, jobTitle: "General Laborer", company: "BuildCorp Construction", status: "Pending", appliedDate: "2025-01-15" },
-    { id: 2, jobTitle: "Warehouse Worker", company: "Logistics Plus", status: "Interview", appliedDate: "2025-01-12" },
-    { id: 3, jobTitle: "House Cleaner", company: "CleanPro Services", status: "Rejected", appliedDate: "2025-01-10" },
-    { id: 4, jobTitle: "Moving Assistant", company: "QuickMove Solutions", status: "Accepted", appliedDate: "2025-01-08" },
+    { id: 1, jobTitle: "🏗️ Masonry Work (Mistri)", company: "City Construction Ltd", status: "Pending", appliedDate: "2025-01-15" },
+    { id: 2, jobTitle: "🚛 Loading/Unloading Helper", company: "Transport Solutions", status: "Interview", appliedDate: "2025-01-12" },
+    { id: 3, jobTitle: "🏠 Construction Cleaning", company: "BuildClean Services", status: "Rejected", appliedDate: "2025-01-10" },
+    { id: 4, jobTitle: "🌱 Landscaping Assistant", company: "Green Gardens Co", status: "Accepted", appliedDate: "2025-01-08" },
   ];
 
   const savedJobs = [
-    { id: 1, title: "General Laborer", company: "BuildCorp Construction", location: "Downtown", salary: "$15-18/hour" },
-    { id: 2, title: "Warehouse Worker", company: "Logistics Plus", location: "Industrial District", salary: "$14-16/hour" },
-    { id: 3, title: "House Cleaner", company: "CleanPro Services", location: "Residential Areas", salary: "$12-15/hour" },
-    { id: 4, title: "Landscaping Helper", company: "GreenThumb Landscaping", location: "Various Locations", salary: "$13-17/hour" },
-    { id: 5, title: "Moving Assistant", company: "QuickMove Solutions", location: "City Wide", salary: "$16-20/hour" },
-    { id: 6, title: "Kitchen Helper", company: "Restaurant Group", location: "Food District", salary: "$11-14/hour" },
+    { id: 1, title: "🏗️ Masonry Work (Mistri)", company: "Metro Construction", location: "Industrial Area", salary: "₹500-700/day" },
+    { id: 2, title: "🏗️ Carpentry Helper", company: "WoodCraft Associates", location: "Workshop District", salary: "₹450-600/day" },
+    { id: 3, title: "🚛 Truck Loading Helper", company: "Quick Transport", location: "Transport Hub", salary: "₹400-550/day" },
+    { id: 4, title: "🏗️ Painting Work", company: "Color Masters", location: "Residential Areas", salary: "₹500-650/day" },
+    { id: 5, title: "🏠 Household Shifting", company: "EasyMove Services", location: "City Wide", salary: "₹600-800/day" },
+    { id: 6, title: "🌱 Farm Labor Assistant", company: "AgriWork Co-op", location: "Rural Areas", salary: "₹350-500/day" },
+    { id: 7, title: "🏢 Event Setup Helper", company: "Event Solutions", location: "Various Venues", salary: "₹450-600/day" },
+    { id: 8, title: "🏗️ Concrete Mixing Helper", company: "Strong Build Ltd", location: "Construction Sites", salary: "₹400-550/day" },
   ];
 
   const handleEditSubmit = () => {
