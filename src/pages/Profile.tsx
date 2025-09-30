@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,13 +33,47 @@ const Profile = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [editForm, setEditForm] = useState({
-    fullName: user?.user_metadata?.full_name || "",
-    phone: user?.user_metadata?.phone || "",
-    location: user?.user_metadata?.location || "",
-    bio: user?.user_metadata?.bio || "",
-    skills: user?.user_metadata?.skills || ""
+    fullName: "",
+    phone: "",
+    location: "",
+    bio: "",
+    skills: ""
   });
+
+  useEffect(() => {
+    if (user) {
+      fetchProfile();
+    }
+  }, [user]);
+
+  const fetchProfile = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user?.id)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (data) {
+        setEditForm({
+          fullName: data.full_name || "",
+          phone: data.phone || "",
+          location: data.location || "",
+          bio: data.bio || "",
+          skills: data.skills ? data.skills.join(", ") : ""
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Mock data - in real app this would come from backend
   const profileStats = {
@@ -66,13 +101,38 @@ const Profile = () => {
     { id: 8, title: "🏗️ Concrete Mixing Helper", company: "Strong Build Ltd", location: "Construction Sites", salary: "₹400-550/day" },
   ];
 
-  const handleEditSubmit = () => {
-    // In real app, this would update the user profile via Supabase
-    toast({
-      title: "Profile updated successfully",
-      description: "Your profile information has been saved."
-    });
-    setIsEditModalOpen(false);
+  const handleEditSubmit = async () => {
+    try {
+      const skillsArray = editForm.skills
+        ? editForm.skills.split(",").map((s) => s.trim()).filter(Boolean)
+        : [];
+
+      const { error } = await supabase
+        .from("profiles")
+        .upsert({
+          id: user?.id,
+          full_name: editForm.fullName,
+          phone: editForm.phone,
+          location: editForm.location,
+          bio: editForm.bio,
+          skills: skillsArray
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Profile updated successfully",
+        description: "Your profile information has been saved."
+      });
+      setIsEditModalOpen(false);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update profile. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -96,6 +156,18 @@ const Profile = () => {
               <CardDescription>Please log in to view your profile</CardDescription>
             </CardHeader>
           </Card>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="flex items-center justify-center min-h-[80vh]">
+          <p className="text-muted-foreground">Loading profile...</p>
         </div>
         <Footer />
       </div>
