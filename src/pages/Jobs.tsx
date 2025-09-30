@@ -1,92 +1,99 @@
-import { useState } from "react";
-import { Search, Filter, MapPin } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, Filter, MapPin, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import JobCard from "@/components/JobCard";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import PostJobModal from "@/components/PostJobModal";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 const Jobs = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All Jobs");
+  const [isPostJobModalOpen, setIsPostJobModalOpen] = useState(false);
+  const [jobs, setJobs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Define filter categories
   const categories = [
     "All Jobs",
-    "Carpentry", 
-    "Electrical",
-    "Masonry",
-    "HVAC",
-    "Plumbing"
+    "🏗️ Construction-Related Work",
+    "🚛 Loading & Unloading",
+    "🏠 Household Work",
+    "🌱 Outdoor & Agricultural Work",
+    "🏢 Small Contract Work",
   ];
 
-  // Mock job data
-  const jobs = [
-    {
-      title: "Experienced Carpenter",
-      company: "BuildCorp Construction",
-      location: "New York, NY",
-      wage: "$35/hour",
-      type: "Full-time",
-      description: "Looking for an experienced carpenter for residential construction projects. Must have 5+ years experience with framing, finishing, and custom woodwork.",
-      skills: ["Framing", "Finish Carpentry", "Blueprint Reading"],
-      postedTime: "2 hours ago"
-    },
-    {
-      title: "Licensed Electrician",
-      company: "PowerTech Solutions",
-      location: "Brooklyn, NY",
-      wage: "$40-45/hour",
-      type: "Contract",
-      description: "Commercial electrician needed for large office building project. Must be licensed and have experience with commercial electrical systems.",
-      skills: ["Commercial Wiring", "Electrical Code", "Troubleshooting"],
-      postedTime: "4 hours ago"
-    },
-    {
-      title: "Masonry Specialist",
-      company: "Stone & Brick Masters",
-      location: "Queens, NY",
-      wage: "$38/hour",
-      type: "Full-time",
-      description: "Skilled mason needed for high-end residential projects. Experience with natural stone, brick, and decorative masonry required.",
-      skills: ["Stone Work", "Brick Laying", "Restoration"],
-      postedTime: "1 day ago"
-    },
-    {
-      title: "HVAC Technician",
-      company: "Cool Air Systems",
-      location: "Manhattan, NY",
-      wage: "$42/hour",
-      type: "Full-time",
-      description: "HVAC technician for installation and maintenance of commercial systems. EPA certification required.",
-      skills: ["HVAC Installation", "System Maintenance", "EPA Certified"],
-      postedTime: "2 days ago"
+  useEffect(() => {
+    fetchJobs();
+  }, []);
+
+  const fetchJobs = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("jobs")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setJobs(data || []);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load jobs",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const handleJobPosted = () => {
+    fetchJobs();
+  };
 
   // Filter jobs based on selected category and search term
-  const filteredJobs = jobs.filter(job => {
-    const matchesCategory = selectedCategory === "All Jobs" || 
-      job.title.toLowerCase().includes(selectedCategory.toLowerCase()) ||
-      job.skills.some(skill => skill.toLowerCase().includes(selectedCategory.toLowerCase())) ||
-      (selectedCategory === "Carpentry" && (job.title.toLowerCase().includes("carpenter") || job.skills.some(s => s.toLowerCase().includes("carpenter") || s.toLowerCase().includes("framing")))) ||
-      (selectedCategory === "Electrical" && (job.title.toLowerCase().includes("electric") || job.skills.some(s => s.toLowerCase().includes("electric") || s.toLowerCase().includes("wiring")))) ||
-      (selectedCategory === "Masonry" && (job.title.toLowerCase().includes("mason") || job.skills.some(s => s.toLowerCase().includes("mason") || s.toLowerCase().includes("stone") || s.toLowerCase().includes("brick")))) ||
-      (selectedCategory === "HVAC" && (job.title.toLowerCase().includes("hvac") || job.skills.some(s => s.toLowerCase().includes("hvac")))) ||
-      (selectedCategory === "Plumbing" && (job.title.toLowerCase().includes("plumb") || job.skills.some(s => s.toLowerCase().includes("plumb"))));
-    
-    const matchesSearch = searchTerm === "" || 
+  const filteredJobs = jobs.filter((job) => {
+    const matchesCategory =
+      selectedCategory === "All Jobs" ||
+      job.category === selectedCategory ||
+      job.title.toLowerCase().includes(selectedCategory.toLowerCase());
+
+    const matchesSearch =
+      searchTerm === "" ||
       job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
       job.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      job.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    const matchesLocation = locationFilter === "" ||
+      (job.skills &&
+        job.skills.some((skill: string) =>
+          skill.toLowerCase().includes(searchTerm.toLowerCase())
+        ));
+
+    const matchesLocation =
+      locationFilter === "" ||
       job.location.toLowerCase().includes(locationFilter.toLowerCase());
-    
+
     return matchesCategory && matchesSearch && matchesLocation;
   });
+
+  const getTimeAgo = (timestamp: string) => {
+    const now = new Date();
+    const created = new Date(timestamp);
+    const diffMs = now.getTime() - created.getTime();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffHours < 24) return `${diffHours} hours ago`;
+    if (diffDays === 1) return "1 day ago";
+    return `${diffDays} days ago`;
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -95,8 +102,26 @@ const Jobs = () => {
       {/* Header */}
       <div className="pt-24 pb-12 bg-gradient-subtle">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-bold text-foreground mb-4">Find Your Next Job</h1>
-          <p className="text-xl text-muted-foreground">Discover opportunities with top employers in your area</p>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h1 className="text-4xl font-bold text-foreground mb-4">
+                Find Your Next Job
+              </h1>
+              <p className="text-xl text-muted-foreground">
+                Discover opportunities with top employers in your area
+              </p>
+            </div>
+            {user && (
+              <Button
+                size="lg"
+                onClick={() => setIsPostJobModalOpen(true)}
+                className="flex items-center gap-2"
+              >
+                <Plus className="w-5 h-5" />
+                Post a Job
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -163,9 +188,23 @@ const Jobs = () => {
 
         {/* Job Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {filteredJobs.length > 0 ? (
-            filteredJobs.map((job, index) => (
-              <JobCard key={index} {...job} />
+          {loading ? (
+            <div className="col-span-full text-center py-12">
+              <p className="text-muted-foreground text-lg">Loading jobs...</p>
+            </div>
+          ) : filteredJobs.length > 0 ? (
+            filteredJobs.map((job) => (
+              <JobCard
+                key={job.id}
+                title={job.title}
+                company={job.company}
+                location={job.location}
+                wage={job.wage}
+                type={job.type}
+                description={job.description}
+                skills={job.skills || []}
+                postedTime={getTimeAgo(job.created_at)}
+              />
             ))
           ) : (
             <div className="col-span-full text-center py-12">
@@ -195,6 +234,12 @@ const Jobs = () => {
       </div>
 
       <Footer />
+      
+      <PostJobModal
+        open={isPostJobModalOpen}
+        onOpenChange={setIsPostJobModalOpen}
+        onJobPosted={handleJobPosted}
+      />
     </div>
   );
 };
