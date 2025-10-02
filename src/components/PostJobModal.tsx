@@ -20,6 +20,7 @@ const jobSchema = z.object({
   description: z.string().trim().min(20, "Description must be at least 20 characters").max(2000),
   category: z.string().min(1, "Category is required"),
   skills: z.string().trim().max(500),
+  positions_available: z.number().min(1, "At least 1 position is required").max(100),
 });
 
 interface PostJobModalProps {
@@ -41,6 +42,7 @@ const PostJobModal = ({ open, onOpenChange, onJobPosted }: PostJobModalProps) =>
     description: "",
     category: "",
     skills: "",
+    positions_available: 1,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -85,6 +87,7 @@ const PostJobModal = ({ open, onOpenChange, onJobPosted }: PostJobModalProps) =>
         description: validated.description,
         category: validated.category,
         skills: skillsArray,
+        positions_available: validated.positions_available,
       });
 
       if (error) throw error;
@@ -103,6 +106,7 @@ const PostJobModal = ({ open, onOpenChange, onJobPosted }: PostJobModalProps) =>
         description: "",
         category: "",
         skills: "",
+        positions_available: 1,
       });
       onJobPosted();
       onOpenChange(false);
@@ -251,6 +255,20 @@ const PostJobModal = ({ open, onOpenChange, onJobPosted }: PostJobModalProps) =>
                 placeholder="e.g., Brick Laying, Plastering, Concrete Mixing"
               />
               {errors.skills && <p className="text-sm text-destructive">{errors.skills}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="positions_available">Number of Positions Needed *</Label>
+              <Input
+                id="positions_available"
+                type="number"
+                min="1"
+                max="100"
+                value={formData.positions_available}
+                onChange={(e) => setFormData({ ...formData, positions_available: parseInt(e.target.value) || 1 })}
+                placeholder="e.g., 3"
+              />
+              {errors.positions_available && <p className="text-sm text-destructive">{errors.positions_available}</p>}
             </div>
           </div>
 

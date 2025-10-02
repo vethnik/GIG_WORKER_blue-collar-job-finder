@@ -196,6 +196,7 @@ const Jobs = () => {
             filteredJobs.map((job) => (
               <JobCard
                 key={job.id}
+                jobId={job.id}
                 title={job.title}
                 company={job.company}
                 location={job.location}
@@ -204,6 +205,8 @@ const Jobs = () => {
                 description={job.description}
                 skills={job.skills || []}
                 postedTime={getTimeAgo(job.created_at)}
+                positionsAvailable={job.positions_available || 1}
+                positionsFilled={job.positions_filled || 0}
               />
             ))
           ) : (

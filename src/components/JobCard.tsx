@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { MapPin, Clock, DollarSign, User } from "lucide-react";
+import { MapPin, Clock, DollarSign, User, Users } from "lucide-react";
 import { useState } from "react";
 import JobApplicationModal from "./JobApplicationModal";
 import { useToast } from "@/hooks/use-toast";
 
 interface JobCardProps {
+  jobId: string;
   title: string;
   company: string;
   location: string;
@@ -13,11 +14,16 @@ interface JobCardProps {
   description: string;
   skills: string[];
   postedTime: string;
+  positionsAvailable: number;
+  positionsFilled: number;
 }
 
-const JobCard = ({ title, company, location, wage, type, description, skills, postedTime }: JobCardProps) => {
+const JobCard = ({ jobId, title, company, location, wage, type, description, skills, postedTime, positionsAvailable, positionsFilled }: JobCardProps) => {
   const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
   const { toast } = useToast();
+
+  const isFull = positionsFilled >= positionsAvailable;
+  const positionsRemaining = positionsAvailable - positionsFilled;
 
   const handleSaveJob = () => {
     toast({
@@ -26,7 +32,7 @@ const JobCard = ({ title, company, location, wage, type, description, skills, po
     });
   };
   return (
-    <div className="bg-card border border-border rounded-lg p-6 shadow-card hover:shadow-elegant transition-all duration-300 hover:-translate-y-1">
+    <div className={`bg-card border border-border rounded-lg p-6 shadow-card hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 ${isFull ? 'opacity-60' : ''}`}>
       <div className="flex justify-between items-start mb-4">
         <div>
           <h3 className="text-xl font-semibold text-card-foreground mb-1">{title}</h3>
@@ -41,11 +47,15 @@ const JobCard = ({ title, company, location, wage, type, description, skills, po
         </div>
       </div>
       
-      <div className="flex items-center text-muted-foreground mb-3">
+      <div className="flex items-center text-muted-foreground mb-3 flex-wrap gap-y-1">
         <MapPin className="w-4 h-4 mr-1" />
         <span className="text-sm">{location}</span>
         <Clock className="w-4 h-4 ml-4 mr-1" />
         <span className="text-sm">{postedTime}</span>
+        <Users className="w-4 h-4 ml-4 mr-1" />
+        <span className={`text-sm font-medium ${isFull ? 'text-destructive' : 'text-primary'}`}>
+          {isFull ? 'Positions Filled' : `${positionsRemaining} position${positionsRemaining !== 1 ? 's' : ''} available`}
+        </span>
       </div>
       
       <p className="text-card-foreground mb-4 text-sm leading-relaxed">{description}</p>
@@ -66,8 +76,9 @@ const JobCard = ({ title, company, location, wage, type, description, skills, po
           variant="default" 
           className="flex-1"
           onClick={() => setIsApplicationModalOpen(true)}
+          disabled={isFull}
         >
-          Apply Now
+          {isFull ? 'Positions Filled' : 'Apply Now'}
         </Button>
         <Button 
           variant="outline" 
@@ -82,6 +93,7 @@ const JobCard = ({ title, company, location, wage, type, description, skills, po
       <JobApplicationModal
         isOpen={isApplicationModalOpen}
         onClose={() => setIsApplicationModalOpen(false)}
+        jobId={jobId}
         jobTitle={title}
         company={company}
       />

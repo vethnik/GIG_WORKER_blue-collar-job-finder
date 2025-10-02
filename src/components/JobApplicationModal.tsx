@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,17 +11,22 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 interface JobApplicationModalProps {
   isOpen: boolean;
   onClose: () => void;
+  jobId: string;
   jobTitle: string;
   company: string;
 }
 
-const JobApplicationModal = ({ isOpen, onClose, jobTitle, company }: JobApplicationModalProps) => {
+const JobApplicationModal = ({ isOpen, onClose, jobId, jobTitle, company }: JobApplicationModalProps) => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -28,17 +34,62 @@ const JobApplicationModal = ({ isOpen, onClose, jobTitle, company }: JobApplicat
     coverLetter: "",
     experience: ""
   });
-  const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically send the application to your backend
-    toast({
-      title: "Application Submitted!",
-      description: `Your application for ${jobTitle} at ${company} has been sent successfully.`,
-    });
-    onClose();
-    setFormData({ name: "", email: "", phone: "", coverLetter: "", experience: "" });
+
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to apply for jobs",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // Insert job application
+      const { error } = await supabase
+        .from("job_applications")
+        .insert({
+          job_id: jobId,
+          user_id: user.id,
+        });
+
+      if (error) {
+        if (error.code === '23505') { // Unique constraint violation
+          toast({
+            title: "Already Applied",
+            description: "You have already applied to this job.",
+            variant: "destructive",
+          });
+        } else {
+          throw error;
+        }
+        return;
+      }
+
+      toast({
+        title: "Application Submitted!",
+        description: `Your application for ${jobTitle} at ${company} has been sent successfully.`,
+      });
+      onClose();
+      setFormData({ name: "", email: "", phone: "", coverLetter: "", experience: "" });
+      
+      // Reload the page to update the positions count
+      window.location.reload();
+    } catch (error) {
+      console.error('Error submitting application:', error);
+      toast({
+        title: "Error",
+        description: "Failed to submit application. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -108,11 +159,11 @@ const JobApplicationModal = ({ isOpen, onClose, jobTitle, company }: JobApplicat
           </div>
           
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
               Cancel
             </Button>
-            <Button type="submit" variant="hero">
-              Submit Application
+            <Button type="submit" disabled={loading}>
+              {loading ? "Submitting..." : "Submit Application"}
             </Button>
           </DialogFooter>
         </form>
