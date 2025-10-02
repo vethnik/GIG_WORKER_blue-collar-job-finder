@@ -15,6 +15,7 @@ const Workers = () => {
   // Define filter categories
   const categories = [
     "All Workers",
+    "General Laborers",
     "Carpenters", 
     "Electricians",
     "Masons",
@@ -156,19 +157,165 @@ const Workers = () => {
       yearsExperience: 10,
       phone: "(555) 234-5678",
       email: "kevin@example.com"
+    },
+    {
+      name: "James Thompson",
+      trade: "Construction Laborer",
+      location: "Brooklyn, NY",
+      rating: 4.7,
+      reviewCount: 18,
+      skills: ["Material Handling", "Site Preparation", "Tool Assistance", "Scaffolding Assembly"],
+      yearsExperience: 5,
+      phone: "(555) 345-6789",
+      email: "james@example.com"
+    },
+    {
+      name: "Maria Sanchez",
+      trade: "Warehouse Worker",
+      location: "Queens, NY",
+      rating: 4.8,
+      reviewCount: 24,
+      skills: ["Packing & Sorting", "Forklift Operation", "Inventory Management", "Loading/Unloading"],
+      yearsExperience: 6,
+      phone: "(555) 456-7890",
+      email: "maria@example.com"
+    },
+    {
+      name: "John Davis",
+      trade: "Landscaping Helper",
+      location: "Staten Island, NY",
+      rating: 4.6,
+      reviewCount: 15,
+      skills: ["Lawn Mowing", "Hedge Trimming", "Planting", "Debris Removal"],
+      yearsExperience: 4,
+      phone: "(555) 567-8901",
+      email: "john@example.com"
+    },
+    {
+      name: "Patricia Lee",
+      trade: "Manufacturing Worker",
+      location: "Bronx, NY",
+      rating: 4.5,
+      reviewCount: 20,
+      skills: ["Assembly Line", "Quality Control", "Machine Operation", "Packaging"],
+      yearsExperience: 7,
+      phone: "(555) 678-9012",
+      email: "patricia@example.com"
+    },
+    {
+      name: "Robert Jackson",
+      trade: "Janitorial Worker",
+      location: "Manhattan, NY",
+      rating: 4.9,
+      reviewCount: 32,
+      skills: ["Commercial Cleaning", "Floor Maintenance", "Waste Management", "Minor Repairs"],
+      yearsExperience: 8,
+      phone: "(555) 789-0123",
+      email: "robert.j@example.com"
+    },
+    {
+      name: "Miguel Hernandez",
+      trade: "Farm Laborer",
+      location: "Long Island, NY",
+      rating: 4.7,
+      reviewCount: 12,
+      skills: ["Harvesting", "Planting", "Crop Maintenance", "Livestock Care"],
+      yearsExperience: 9,
+      phone: "(555) 890-1234",
+      email: "miguel@example.com"
+    },
+    {
+      name: "Emily White",
+      trade: "Event Setup Crew",
+      location: "Jersey City, NJ",
+      rating: 4.6,
+      reviewCount: 16,
+      skills: ["Event Setup", "Equipment Assembly", "Crowd Control", "Breakdown Services"],
+      yearsExperience: 3,
+      phone: "(555) 901-2345",
+      email: "emily@example.com"
+    },
+    {
+      name: "David Martinez",
+      trade: "Construction Helper",
+      location: "Newark, NJ",
+      rating: 4.8,
+      reviewCount: 22,
+      skills: ["Concrete Mixing", "Trench Digging", "Debris Cleanup", "Assisting Tradespeople"],
+      yearsExperience: 6,
+      phone: "(555) 012-3456",
+      email: "david.m@example.com"
+    },
+    {
+      name: "Linda Brown",
+      trade: "General Laborer",
+      location: "Yonkers, NY",
+      rating: 4.5,
+      reviewCount: 14,
+      skills: ["Physical Work", "Team Collaboration", "Tool Handling", "Site Safety"],
+      yearsExperience: 4,
+      phone: "(555) 123-4567",
+      email: "linda@example.com"
+    },
+    {
+      name: "Carlos Ruiz",
+      trade: "Warehouse Laborer",
+      location: "White Plains, NY",
+      rating: 4.7,
+      reviewCount: 19,
+      skills: ["Stock Organization", "Package Handling", "Shipping & Receiving", "Inventory Counting"],
+      yearsExperience: 5,
+      phone: "(555) 234-5678",
+      email: "carlos.r@example.com"
+    },
+    {
+      name: "Angela Moore",
+      trade: "Groundskeeper",
+      location: "Hoboken, NJ",
+      rating: 4.6,
+      reviewCount: 17,
+      skills: ["Yard Maintenance", "Mulch Spreading", "Basic Irrigation", "Outdoor Cleanup"],
+      yearsExperience: 5,
+      phone: "(555) 345-6789",
+      email: "angela@example.com"
+    },
+    {
+      name: "Jose Garcia",
+      trade: "Factory Worker",
+      location: "New Rochelle, NY",
+      rating: 4.8,
+      reviewCount: 25,
+      skills: ["Production Line", "Equipment Cleaning", "Safety Compliance", "Product Inspection"],
+      yearsExperience: 8,
+      phone: "(555) 456-7890",
+      email: "jose@example.com"
     }
   ];
 
   // Filter workers based on selected category and search term
   const filteredWorkers = workers.filter(worker => {
+    const tradeLower = worker.trade.toLowerCase();
     const matchesCategory = selectedCategory === "All Workers" || 
-      worker.trade.toLowerCase().includes(selectedCategory.toLowerCase().slice(0, -1)) || // Remove 's' from plural
-      (selectedCategory === "Carpenters" && worker.trade.toLowerCase().includes("carpenter")) ||
-      (selectedCategory === "Electricians" && worker.trade.toLowerCase().includes("electrician")) ||
-      (selectedCategory === "Masons" && worker.trade.toLowerCase().includes("mason")) ||
-      (selectedCategory === "HVAC" && worker.trade.toLowerCase().includes("hvac")) ||
-      (selectedCategory === "Plumbers" && worker.trade.toLowerCase().includes("plumber")) ||
-      (selectedCategory === "Tile Installers" && worker.trade.toLowerCase().includes("tile"));
+      tradeLower.includes(selectedCategory.toLowerCase().slice(0, -1)) || // Remove 's' from plural
+      (selectedCategory === "Carpenters" && tradeLower.includes("carpenter")) ||
+      (selectedCategory === "Electricians" && tradeLower.includes("electrician")) ||
+      (selectedCategory === "Masons" && tradeLower.includes("mason")) ||
+      (selectedCategory === "HVAC" && tradeLower.includes("hvac")) ||
+      (selectedCategory === "Plumbers" && tradeLower.includes("plumber")) ||
+      (selectedCategory === "Tile Installers" && tradeLower.includes("tile")) ||
+      (selectedCategory === "General Laborers" && (
+        tradeLower.includes("laborer") || 
+        tradeLower.includes("warehouse") || 
+        tradeLower.includes("landscaping") ||
+        tradeLower.includes("manufacturing") ||
+        tradeLower.includes("janitorial") ||
+        tradeLower.includes("farm") ||
+        tradeLower.includes("event") ||
+        tradeLower.includes("helper") ||
+        tradeLower.includes("groundskeeper") ||
+        tradeLower.includes("factory") ||
+        tradeLower.includes("cleaning")
+      ));
     
     const matchesSearch = searchTerm === "" || 
       worker.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
