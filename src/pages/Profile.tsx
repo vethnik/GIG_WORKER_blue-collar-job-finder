@@ -34,6 +34,7 @@ const Profile = () => {
   const { toast } = useToast();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [applications, setApplications] = useState<any[]>([]);
   const [editForm, setEditForm] = useState({
     fullName: "",
     phone: "",
@@ -45,6 +46,7 @@ const Profile = () => {
   useEffect(() => {
     if (user) {
       fetchProfile();
+      fetchApplications();
     }
   }, [user]);
 
@@ -75,20 +77,36 @@ const Profile = () => {
     }
   };
 
+  const fetchApplications = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("job_applications")
+        .select(`
+          id,
+          created_at,
+          job_id,
+          jobs (
+            title,
+            company
+          )
+        `)
+        .eq("user_id", user?.id)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setApplications(data || []);
+    } catch (error) {
+      console.error("Error fetching applications:", error);
+    }
+  };
+
   // Mock data - in real app this would come from backend
   const profileStats = {
-    applicationsSubmitted: 24,
+    applicationsSubmitted: applications.length,
     profileViews: 156,
     savedJobs: 8,
     completedProjects: 12
   };
-
-  const recentApplications = [
-    { id: 1, jobTitle: "🏗️ Masonry Work (Mistri)", company: "City Construction Ltd", status: "Pending", appliedDate: "2025-01-15" },
-    { id: 2, jobTitle: "🚛 Loading/Unloading Helper", company: "Transport Solutions", status: "Interview", appliedDate: "2025-01-12" },
-    { id: 3, jobTitle: "🏠 Construction Cleaning", company: "BuildClean Services", status: "Rejected", appliedDate: "2025-01-10" },
-    { id: 4, jobTitle: "🌱 Landscaping Assistant", company: "Green Gardens Co", status: "Accepted", appliedDate: "2025-01-08" },
-  ];
 
   const savedJobs = [
     { id: 1, title: "🏗️ Masonry Work (Mistri)", company: "Metro Construction", location: "Industrial Area", salary: "₹500-700/day" },
@@ -331,21 +349,27 @@ const Profile = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {recentApplications.map((app) => (
-                        <div key={app.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
-                          <div>
-                            <h4 className="font-semibold text-foreground">{app.jobTitle}</h4>
-                            <p className="text-sm text-muted-foreground">{app.company}</p>
-                            <p className="text-xs text-muted-foreground flex items-center mt-1">
-                              <Calendar className="w-3 h-3 mr-1" />
-                              Applied on {app.appliedDate}
-                            </p>
+                      {applications.length === 0 ? (
+                        <p className="text-center text-muted-foreground py-8">
+                          No applications yet. Start applying to jobs!
+                        </p>
+                      ) : (
+                        applications.map((app) => (
+                          <div key={app.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
+                            <div>
+                              <h4 className="font-semibold text-foreground">{app.jobs?.title || "Job Title"}</h4>
+                              <p className="text-sm text-muted-foreground">{app.jobs?.company || "Company"}</p>
+                              <p className="text-xs text-muted-foreground flex items-center mt-1">
+                                <Calendar className="w-3 h-3 mr-1" />
+                                Applied on {new Date(app.created_at).toLocaleDateString()}
+                              </p>
+                            </div>
+                            <Badge variant="secondary">
+                              Applied
+                            </Badge>
                           </div>
-                          <Badge className={getStatusColor(app.status)}>
-                            {app.status}
-                          </Badge>
-                        </div>
-                      ))}
+                        ))
+                      )}
                     </div>
                   </CardContent>
                 </Card>
