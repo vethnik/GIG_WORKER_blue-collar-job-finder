@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import JobApplicationModal from "@/components/JobApplicationModal";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,6 +38,7 @@ const Profile = () => {
   const [applications, setApplications] = useState<any[]>([]);
   const [postedJobs, setPostedJobs] = useState<any[]>([]);
   const [savedJobs, setSavedJobs] = useState<any[]>([]);
+  const [selectedJob, setSelectedJob] = useState<{id: string, title: string, company: string} | null>(null);
   const [editForm, setEditForm] = useState({
     fullName: "",
     phone: "",
@@ -515,6 +517,11 @@ const Profile = () => {
                                 variant={isFull ? "outline" : "default"} 
                                 size="sm"
                                 disabled={isFull}
+                                onClick={() => setSelectedJob({
+                                  id: job.id,
+                                  title: job.title,
+                                  company: job.company
+                                })}
                               >
                                 {isFull ? 'Filled' : 'Apply Now'}
                               </Button>
@@ -625,6 +632,19 @@ const Profile = () => {
           </div>
         </div>
       </main>
+
+      {selectedJob && (
+        <JobApplicationModal
+          isOpen={!!selectedJob}
+          onClose={() => {
+            setSelectedJob(null);
+            fetchApplications();
+          }}
+          jobId={selectedJob.id}
+          jobTitle={selectedJob.title}
+          company={selectedJob.company}
+        />
+      )}
       
       <Footer />
     </div>
