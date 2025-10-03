@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { MapPin, Clock, DollarSign, User, Users } from "lucide-react";
-import { useState } from "react";
+import { MapPin, Clock, User, Users, Bookmark, BookmarkCheck } from "lucide-react";
+import { useState, useEffect } from "react";
 import JobApplicationModal from "./JobApplicationModal";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 interface JobCardProps {
   jobId: string;
@@ -20,16 +22,90 @@ interface JobCardProps {
 
 const JobCard = ({ jobId, title, company, location, wage, type, description, skills, postedTime, positionsAvailable, positionsFilled }: JobCardProps) => {
   const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const isFull = positionsFilled >= positionsAvailable;
   const positionsRemaining = positionsAvailable - positionsFilled;
 
-  const handleSaveJob = () => {
-    toast({
-      title: "Job Saved!",
-      description: `${title} at ${company} has been saved to your favorites.`,
-    });
+  useEffect(() => {
+    checkIfSaved();
+  }, [jobId, user]);
+
+  const checkIfSaved = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from("saved_jobs")
+        .select("id")
+        .eq("job_id", jobId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (error) throw error;
+      setIsSaved(!!data);
+    } catch (error) {
+      console.error("Error checking if job is saved:", error);
+    }
+  };
+
+  const handleSaveJob = async () => {
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to save jobs.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setSaveLoading(true);
+    try {
+      if (isSaved) {
+        // Unsave the job
+        const { error } = await supabase
+          .from("saved_jobs")
+          .delete()
+          .eq("job_id", jobId)
+          .eq("user_id", user.id);
+
+        if (error) throw error;
+
+        setIsSaved(false);
+        toast({
+          title: "Job Removed",
+          description: `${title} has been removed from your saved jobs.`,
+        });
+      } else {
+        // Save the job
+        const { error } = await supabase
+          .from("saved_jobs")
+          .insert({
+            job_id: jobId,
+            user_id: user.id
+          });
+
+        if (error) throw error;
+
+        setIsSaved(true);
+        toast({
+          title: "Job Saved!",
+          description: `${title} has been saved to your favorites.`,
+        });
+      }
+    } catch (error: any) {
+      console.error("Error saving job:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save job. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setSaveLoading(false);
+    }
   };
   return (
     <div className={`bg-card border border-border rounded-lg p-6 shadow-card hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 ${isFull ? 'opacity-60' : ''}`}>
@@ -84,9 +160,10 @@ const JobCard = ({ jobId, title, company, location, wage, type, description, ski
           variant="outline" 
           size="icon"
           onClick={handleSaveJob}
-          title="Save Job"
+          disabled={saveLoading}
+          title={isSaved ? "Unsave Job" : "Save Job"}
         >
-          <DollarSign className="w-4 h-4" />
+          {isSaved ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
         </Button>
       </div>
 

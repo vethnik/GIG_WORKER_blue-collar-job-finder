@@ -36,6 +36,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [applications, setApplications] = useState<any[]>([]);
   const [postedJobs, setPostedJobs] = useState<any[]>([]);
+  const [savedJobs, setSavedJobs] = useState<any[]>([]);
   const [editForm, setEditForm] = useState({
     fullName: "",
     phone: "",
@@ -49,6 +50,7 @@ const Profile = () => {
       fetchProfile();
       fetchApplications();
       fetchPostedJobs();
+      fetchSavedJobs();
     }
   }, [user]);
 
@@ -117,16 +119,44 @@ const Profile = () => {
     }
   };
 
+  const fetchSavedJobs = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("saved_jobs")
+        .select(`
+          id,
+          created_at,
+          jobs (
+            id,
+            title,
+            company,
+            location,
+            wage,
+            type,
+            positions_available,
+            positions_filled
+          )
+        `)
+        .eq("user_id", user?.id)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setSavedJobs(data || []);
+    } catch (error) {
+      console.error("Error fetching saved jobs:", error);
+    }
+  };
+
   // Mock data - in real app this would come from backend
   const profileStats = {
     applicationsSubmitted: applications.length,
     postedJobs: postedJobs.length,
     profileViews: 156,
-    savedJobs: 8,
+    savedJobs: savedJobs.length,
     completedProjects: 12
   };
 
-  const savedJobs = [
+  const mockSavedJobs = [
     { id: 1, title: "🏗️ Masonry Work (Mistri)", company: "Metro Construction", location: "Industrial Area", salary: "₹500-700/day" },
     { id: 2, title: "🏗️ Carpentry Helper", company: "WoodCraft Associates", location: "Workshop District", salary: "₹450-600/day" },
     { id: 3, title: "🚛 Truck Loading Helper", company: "Quick Transport", location: "Transport Hub", salary: "₹400-550/day" },
@@ -457,24 +487,41 @@ const Profile = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {savedJobs.map((job) => (
-                        <div key={job.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
-                          <div>
-                            <h4 className="font-semibold text-foreground">{job.title}</h4>
-                            <p className="text-sm text-muted-foreground">{job.company}</p>
-                            <div className="flex items-center space-x-4 mt-1">
-                              <span className="text-xs text-muted-foreground flex items-center">
-                                <MapPin className="w-3 h-3 mr-1" />
-                                {job.location}
-                              </span>
-                              <span className="text-xs text-primary font-medium">{job.salary}</span>
+                      {savedJobs.length === 0 ? (
+                        <p className="text-center text-muted-foreground py-8">
+                          You haven't saved any jobs yet. Start browsing jobs and save the ones you like!
+                        </p>
+                      ) : (
+                        savedJobs.map((savedJob: any) => {
+                          const job = savedJob.jobs;
+                          const isFull = job.positions_filled >= job.positions_available;
+                          return (
+                            <div key={savedJob.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
+                              <div>
+                                <h4 className="font-semibold text-foreground">{job.title}</h4>
+                                <p className="text-sm text-muted-foreground">{job.company}</p>
+                                <div className="flex items-center space-x-4 mt-1">
+                                  <span className="text-xs text-muted-foreground flex items-center">
+                                    <MapPin className="w-3 h-3 mr-1" />
+                                    {job.location}
+                                  </span>
+                                  <span className="text-xs text-primary font-medium">{job.wage}</span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {job.positions_available - job.positions_filled} position{job.positions_available - job.positions_filled !== 1 ? 's' : ''} available
+                                  </span>
+                                </div>
+                              </div>
+                              <Button 
+                                variant={isFull ? "outline" : "default"} 
+                                size="sm"
+                                disabled={isFull}
+                              >
+                                {isFull ? 'Filled' : 'Apply Now'}
+                              </Button>
                             </div>
-                          </div>
-                          <Button variant="outline" size="sm">
-                            Apply Now
-                          </Button>
-                        </div>
-                      ))}
+                          );
+                        })
+                      )}
                     </div>
                   </CardContent>
                 </Card>
