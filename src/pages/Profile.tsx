@@ -35,6 +35,7 @@ const Profile = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [applications, setApplications] = useState<any[]>([]);
+  const [postedJobs, setPostedJobs] = useState<any[]>([]);
   const [editForm, setEditForm] = useState({
     fullName: "",
     phone: "",
@@ -47,6 +48,7 @@ const Profile = () => {
     if (user) {
       fetchProfile();
       fetchApplications();
+      fetchPostedJobs();
     }
   }, [user]);
 
@@ -100,9 +102,25 @@ const Profile = () => {
     }
   };
 
+  const fetchPostedJobs = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("jobs")
+        .select("*")
+        .eq("user_id", user?.id)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setPostedJobs(data || []);
+    } catch (error) {
+      console.error("Error fetching posted jobs:", error);
+    }
+  };
+
   // Mock data - in real app this would come from backend
   const profileStats = {
     applicationsSubmitted: applications.length,
+    postedJobs: postedJobs.length,
     profileViews: 156,
     savedJobs: 8,
     completedProjects: 12
@@ -307,20 +325,20 @@ const Profile = () => {
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Profile Views</span>
-                  <Badge variant="secondary">{profileStats.profileViews}</Badge>
+                  <span className="text-sm text-muted-foreground">Posted Jobs</span>
+                  <Badge variant="secondary">{profileStats.postedJobs}</Badge>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Applications</span>
                   <Badge variant="secondary">{profileStats.applicationsSubmitted}</Badge>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Saved Jobs</span>
-                  <Badge variant="secondary">{profileStats.savedJobs}</Badge>
+                  <span className="text-sm text-muted-foreground">Profile Views</span>
+                  <Badge variant="secondary">{profileStats.profileViews}</Badge>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Completed Projects</span>
-                  <Badge variant="secondary">{profileStats.completedProjects}</Badge>
+                  <span className="text-sm text-muted-foreground">Saved Jobs</span>
+                  <Badge variant="secondary">{profileStats.savedJobs}</Badge>
                 </div>
               </CardContent>
             </Card>
@@ -329,8 +347,9 @@ const Profile = () => {
           {/* Main Content */}
           <div className="lg:col-span-2">
             <Tabs defaultValue="applications" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="applications">Applications</TabsTrigger>
+                <TabsTrigger value="posted">Posted Jobs</TabsTrigger>
                 <TabsTrigger value="saved">Saved Jobs</TabsTrigger>
                 <TabsTrigger value="activity">Activity</TabsTrigger>
                 <TabsTrigger value="settings">Settings</TabsTrigger>
@@ -367,6 +386,56 @@ const Profile = () => {
                             <Badge variant="secondary">
                               Applied
                             </Badge>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="posted" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Briefcase className="w-5 h-5 mr-2" />
+                      Posted Jobs ({profileStats.postedJobs})
+                    </CardTitle>
+                    <CardDescription>
+                      Jobs you have posted on the platform
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {postedJobs.length === 0 ? (
+                        <p className="text-center text-muted-foreground py-8">
+                          You haven't posted any jobs yet.
+                        </p>
+                      ) : (
+                        postedJobs.map((job) => (
+                          <div key={job.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
+                            <div>
+                              <h4 className="font-semibold text-foreground">{job.title}</h4>
+                              <p className="text-sm text-muted-foreground">{job.company}</p>
+                              <div className="flex items-center space-x-4 mt-1">
+                                <span className="text-xs text-muted-foreground flex items-center">
+                                  <MapPin className="w-3 h-3 mr-1" />
+                                  {job.location}
+                                </span>
+                                <span className="text-xs text-primary font-medium">{job.wage}</span>
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {job.positions_filled}/{job.positions_available} positions filled
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <Badge variant={job.positions_filled >= job.positions_available ? "destructive" : "secondary"}>
+                                {job.positions_filled >= job.positions_available ? "Filled" : "Open"}
+                              </Badge>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Posted {new Date(job.created_at).toLocaleDateString()}
+                              </p>
+                            </div>
                           </div>
                         ))
                       )}
