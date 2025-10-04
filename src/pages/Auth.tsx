@@ -118,7 +118,7 @@ const Auth = () => {
       } else {
         toast({
           title: "Account created successfully!",
-          description: "Welcome to SkillConnect. You can now start exploring jobs and connecting with workers.",
+          description: "Welcome to Gig Worker. You can now start exploring jobs and connecting with workers.",
         });
         navigate("/");
       }
@@ -142,7 +142,7 @@ const Auth = () => {
             <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center">
               <Briefcase className="w-6 h-6 text-white" />
             </div>
-            <span className="text-2xl font-bold text-foreground">SkillConnect</span>
+            <span className="text-2xl font-bold text-foreground">Gig Worker</span>
           </Link>
         </div>
 

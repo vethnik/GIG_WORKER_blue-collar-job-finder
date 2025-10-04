@@ -40,7 +40,7 @@ const WorkerCard = ({
         description: `Calling ${name} at ${phone}`,
       });
     } else if (method === 'email' && email) {
-      window.location.href = `mailto:${email}?subject=Job Opportunity - SkillConnect`;
+      window.location.href = `mailto:${email}?subject=Job Opportunity - Gig Worker`;
       toast({
         title: "Opening Email App",
         description: `Sending email to ${name}`,

@@ -45,7 +45,7 @@ const WorkerProfileModal = ({ isOpen, onClose, worker }: WorkerProfileModalProps
         description: `Calling ${worker.name} at ${worker.phone}`,
       });
     } else if (method === 'email' && worker.email) {
-      window.location.href = `mailto:${worker.email}?subject=Job Opportunity - SkillConnect`;
+      window.location.href = `mailto:${worker.email}?subject=Job Opportunity - Gig Worker`;
       toast({
         title: "Opening Email App",
         description: `Sending email to ${worker.name}`,

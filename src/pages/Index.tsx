@@ -15,7 +15,7 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-              Why Choose SkillConnect?
+              Why Choose Gig Worker?
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               The most trusted platform for connecting skilled workers with quality employers
@@ -63,7 +63,7 @@ const Index = () => {
             Ready to Get Started?
           </h2>
           <p className="text-xl text-muted-foreground mb-8">
-            Join thousands of professionals who trust SkillConnect for their career and hiring needs
+            Join thousands of professionals who trust Gig Worker for their career and hiring needs
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

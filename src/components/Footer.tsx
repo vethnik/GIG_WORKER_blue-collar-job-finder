@@ -11,7 +11,7 @@ const Footer = () => {
               <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
                 <Briefcase className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold text-foreground">SkillConnect</span>
+              <span className="text-xl font-bold text-foreground">Gig Worker</span>
             </div>
             <p className="text-muted-foreground mb-4 max-w-md">
               Connecting skilled workers with local employers. Find your next 
@@ -20,7 +20,7 @@ const Footer = () => {
             <div className="flex items-center space-x-4 text-muted-foreground">
               <div className="flex items-center">
                 <Mail className="w-4 h-4 mr-2" />
-                <span>hello@skillconnect.com</span>
+                <span>hello@gigworker.com</span>
               </div>
               <div className="flex items-center">
                 <Phone className="w-4 h-4 mr-2" />
@@ -54,7 +54,7 @@ const Footer = () => {
         
         <div className="border-t border-border mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-muted-foreground text-sm">
-            © 2024 SkillConnect. All rights reserved.
+            © 2024 Gig Worker. All rights reserved.
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <a href="/privacy" className="text-muted-foreground hover:text-primary text-sm transition-colors">
