@@ -39,6 +39,7 @@ const Profile = () => {
   const [postedJobs, setPostedJobs] = useState<any[]>([]);
   const [savedJobs, setSavedJobs] = useState<any[]>([]);
   const [selectedJob, setSelectedJob] = useState<{id: string, title: string, company: string} | null>(null);
+  const [selectedApplicationJob, setSelectedApplicationJob] = useState<any | null>(null);
   const [editForm, setEditForm] = useState({
     fullName: "",
     phone: "",
@@ -95,8 +96,15 @@ const Profile = () => {
           created_at,
           job_id,
           jobs (
+            id,
             title,
-            company
+            company,
+            location,
+            wage,
+            type,
+            description,
+            positions_available,
+            positions_filled
           )
         `)
         .eq("user_id", user?.id)
@@ -495,8 +503,8 @@ const Profile = () => {
                         </p>
                       ) : (
                         applications.map((app) => (
-                          <div key={app.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
-                            <div>
+                          <div key={app.id} className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors">
+                            <div className="flex-1">
                               <h4 className="font-semibold text-foreground">{app.jobs?.title || "Job Title"}</h4>
                               <p className="text-sm text-muted-foreground">{app.jobs?.company || "Company"}</p>
                               <p className="text-xs text-muted-foreground flex items-center mt-1">
@@ -504,9 +512,19 @@ const Profile = () => {
                                 Applied on {new Date(app.created_at).toLocaleDateString()}
                               </p>
                             </div>
-                            <Badge variant="secondary">
-                              Applied
-                            </Badge>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="secondary">
+                                Applied
+                              </Badge>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => setSelectedApplicationJob(app.jobs)}
+                              >
+                                <Eye className="w-4 h-4 mr-1" />
+                                View Details
+                              </Button>
+                            </div>
                           </div>
                         ))
                       )}
@@ -733,6 +751,41 @@ const Profile = () => {
           jobTitle={selectedJob.title}
           company={selectedJob.company}
         />
+      )}
+
+      {selectedApplicationJob && (
+        <Dialog open={!!selectedApplicationJob} onOpenChange={() => setSelectedApplicationJob(null)}>
+          <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>{selectedApplicationJob.title}</DialogTitle>
+              <DialogDescription>{selectedApplicationJob.company}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <span className="flex items-center">
+                  <MapPin className="w-4 h-4 mr-1" />
+                  {selectedApplicationJob.location}
+                </span>
+                <span className="text-primary font-medium">{selectedApplicationJob.wage}</span>
+                <Badge variant="secondary">{selectedApplicationJob.type}</Badge>
+              </div>
+              <Separator />
+              <div>
+                <h4 className="font-semibold text-foreground mb-2">Job Description</h4>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">{selectedApplicationJob.description}</p>
+              </div>
+              <Separator />
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground">
+                  {selectedApplicationJob.positions_available - selectedApplicationJob.positions_filled} position{selectedApplicationJob.positions_available - selectedApplicationJob.positions_filled !== 1 ? 's' : ''} available
+                </span>
+                <Badge variant={selectedApplicationJob.positions_filled >= selectedApplicationJob.positions_available ? "destructive" : "secondary"}>
+                  {selectedApplicationJob.positions_filled >= selectedApplicationJob.positions_available ? "Filled" : "Open"}
+                </Badge>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
       
       <Footer />
