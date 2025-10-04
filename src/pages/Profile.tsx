@@ -40,6 +40,8 @@ const Profile = () => {
   const [savedJobs, setSavedJobs] = useState<any[]>([]);
   const [selectedJob, setSelectedJob] = useState<{id: string, title: string, company: string} | null>(null);
   const [selectedApplicationJob, setSelectedApplicationJob] = useState<any | null>(null);
+  const [selectedPostedJob, setSelectedPostedJob] = useState<any | null>(null);
+  const [selectedSavedJobDetails, setSelectedSavedJobDetails] = useState<any | null>(null);
   const [editForm, setEditForm] = useState({
     fullName: "",
     phone: "",
@@ -552,8 +554,8 @@ const Profile = () => {
                         </p>
                       ) : (
                         postedJobs.map((job) => (
-                          <div key={job.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
-                            <div>
+                          <div key={job.id} className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors">
+                            <div className="flex-1">
                               <h4 className="font-semibold text-foreground">{job.title}</h4>
                               <p className="text-sm text-muted-foreground">{job.company}</p>
                               <div className="flex items-center space-x-4 mt-1">
@@ -567,13 +569,21 @@ const Profile = () => {
                                 {job.positions_filled}/{job.positions_available} positions filled
                               </p>
                             </div>
-                            <div className="text-right">
+                            <div className="flex flex-col gap-2 items-end">
                               <Badge variant={job.positions_filled >= job.positions_available ? "destructive" : "secondary"}>
                                 {job.positions_filled >= job.positions_available ? "Filled" : "Open"}
                               </Badge>
-                              <p className="text-xs text-muted-foreground mt-1">
+                              <p className="text-xs text-muted-foreground">
                                 Posted {new Date(job.created_at).toLocaleDateString()}
                               </p>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => setSelectedPostedJob(job)}
+                              >
+                                <Eye className="w-4 h-4 mr-1" />
+                                View Details
+                              </Button>
                             </div>
                           </div>
                         ))
@@ -605,8 +615,8 @@ const Profile = () => {
                           const job = savedJob.jobs;
                           const isFull = job.positions_filled >= job.positions_available;
                           return (
-                            <div key={savedJob.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
-                              <div>
+                            <div key={savedJob.id} className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors">
+                              <div className="flex-1">
                                 <h4 className="font-semibold text-foreground">{job.title}</h4>
                                 <p className="text-sm text-muted-foreground">{job.company}</p>
                                 <div className="flex items-center space-x-4 mt-1">
@@ -620,18 +630,28 @@ const Profile = () => {
                                   </span>
                                 </div>
                               </div>
-                              <Button 
-                                variant={isFull ? "outline" : "default"} 
-                                size="sm"
-                                disabled={isFull}
-                                onClick={() => setSelectedJob({
-                                  id: job.id,
-                                  title: job.title,
-                                  company: job.company
-                                })}
-                              >
-                                {isFull ? 'Filled' : 'Apply Now'}
-                              </Button>
+                              <div className="flex gap-2">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => setSelectedSavedJobDetails(job)}
+                                >
+                                  <Eye className="w-4 h-4 mr-1" />
+                                  View Details
+                                </Button>
+                                <Button 
+                                  variant={isFull ? "outline" : "default"} 
+                                  size="sm"
+                                  disabled={isFull}
+                                  onClick={() => setSelectedJob({
+                                    id: job.id,
+                                    title: job.title,
+                                    company: job.company
+                                  })}
+                                >
+                                  {isFull ? 'Filled' : 'Apply Now'}
+                                </Button>
+                              </div>
                             </div>
                           );
                         })
@@ -781,6 +801,76 @@ const Profile = () => {
                 </span>
                 <Badge variant={selectedApplicationJob.positions_filled >= selectedApplicationJob.positions_available ? "destructive" : "secondary"}>
                   {selectedApplicationJob.positions_filled >= selectedApplicationJob.positions_available ? "Filled" : "Open"}
+                </Badge>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {selectedPostedJob && (
+        <Dialog open={!!selectedPostedJob} onOpenChange={() => setSelectedPostedJob(null)}>
+          <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>{selectedPostedJob.title}</DialogTitle>
+              <DialogDescription>{selectedPostedJob.company}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <span className="flex items-center">
+                  <MapPin className="w-4 h-4 mr-1" />
+                  {selectedPostedJob.location}
+                </span>
+                <span className="text-primary font-medium">{selectedPostedJob.wage}</span>
+                <Badge variant="secondary">{selectedPostedJob.type}</Badge>
+              </div>
+              <Separator />
+              <div>
+                <h4 className="font-semibold text-foreground mb-2">Job Description</h4>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">{selectedPostedJob.description}</p>
+              </div>
+              <Separator />
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground">
+                  {selectedPostedJob.positions_filled}/{selectedPostedJob.positions_available} positions filled
+                </span>
+                <Badge variant={selectedPostedJob.positions_filled >= selectedPostedJob.positions_available ? "destructive" : "secondary"}>
+                  {selectedPostedJob.positions_filled >= selectedPostedJob.positions_available ? "Filled" : "Open"}
+                </Badge>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {selectedSavedJobDetails && (
+        <Dialog open={!!selectedSavedJobDetails} onOpenChange={() => setSelectedSavedJobDetails(null)}>
+          <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>{selectedSavedJobDetails.title}</DialogTitle>
+              <DialogDescription>{selectedSavedJobDetails.company}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <span className="flex items-center">
+                  <MapPin className="w-4 h-4 mr-1" />
+                  {selectedSavedJobDetails.location}
+                </span>
+                <span className="text-primary font-medium">{selectedSavedJobDetails.wage}</span>
+                <Badge variant="secondary">{selectedSavedJobDetails.type}</Badge>
+              </div>
+              <Separator />
+              <div>
+                <h4 className="font-semibold text-foreground mb-2">Job Description</h4>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">{selectedSavedJobDetails.description}</p>
+              </div>
+              <Separator />
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground">
+                  {selectedSavedJobDetails.positions_available - selectedSavedJobDetails.positions_filled} position{selectedSavedJobDetails.positions_available - selectedSavedJobDetails.positions_filled !== 1 ? 's' : ''} available
+                </span>
+                <Badge variant={selectedSavedJobDetails.positions_filled >= selectedSavedJobDetails.positions_available ? "destructive" : "secondary"}>
+                  {selectedSavedJobDetails.positions_filled >= selectedSavedJobDetails.positions_available ? "Filled" : "Open"}
                 </Badge>
               </div>
             </div>
