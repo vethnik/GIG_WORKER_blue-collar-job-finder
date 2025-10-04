@@ -44,8 +44,10 @@ const Profile = () => {
     phone: "",
     location: "",
     bio: "",
-    skills: ""
+    skills: "",
+    avatarUrl: ""
   });
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -73,7 +75,8 @@ const Profile = () => {
           phone: data.phone || "",
           location: data.location || "",
           bio: data.bio || "",
-          skills: data.skills ? data.skills.join(", ") : ""
+          skills: data.skills ? data.skills.join(", ") : "",
+          avatarUrl: data.avatar_url || ""
         });
       }
     } catch (error) {
@@ -169,6 +172,62 @@ const Profile = () => {
     { id: 8, title: "🏗️ Concrete Mixing Helper", company: "Strong Build Ltd", location: "Construction Sites", salary: "₹400-550/day" },
   ];
 
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      const file = event.target.files?.[0];
+      if (!file || !user) return;
+
+      setUploadingPhoto(true);
+
+      // Delete old avatar if exists
+      if (editForm.avatarUrl) {
+        const oldPath = editForm.avatarUrl.split('/').pop();
+        if (oldPath) {
+          await supabase.storage.from('avatars').remove([`${user.id}/${oldPath}`]);
+        }
+      }
+
+      // Upload new avatar
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${user.id}/${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // Update profile
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('id', user.id);
+
+      if (updateError) throw updateError;
+
+      setEditForm({ ...editForm, avatarUrl: publicUrl });
+
+      toast({
+        title: "Photo uploaded successfully",
+        description: "Your profile photo has been updated."
+      });
+    } catch (error) {
+      console.error("Error uploading photo:", error);
+      toast({
+        title: "Error",
+        description: "Failed to upload photo. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
   const handleEditSubmit = async () => {
     try {
       const skillsArray = editForm.skills
@@ -183,7 +242,8 @@ const Profile = () => {
           phone: editForm.phone,
           location: editForm.location,
           bio: editForm.bio,
-          skills: skillsArray
+          skills: skillsArray,
+          avatar_url: editForm.avatarUrl
         });
 
       if (error) throw error;
@@ -257,8 +317,37 @@ const Profile = () => {
           <div className="lg:col-span-1">
             <Card>
               <CardHeader className="text-center">
-                <div className="w-24 h-24 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                  <User className="w-12 h-12 text-white" />
+                <div className="relative w-24 h-24 mx-auto mb-4 group">
+                  {editForm.avatarUrl ? (
+                    <img 
+                      src={editForm.avatarUrl} 
+                      alt="Profile" 
+                      className="w-24 h-24 rounded-full object-cover border-4 border-primary/10"
+                    />
+                  ) : (
+                    <div className="w-24 h-24 bg-gradient-primary rounded-full flex items-center justify-center">
+                      <User className="w-12 h-12 text-white" />
+                    </div>
+                  )}
+                  <label 
+                    htmlFor="photo-upload" 
+                    className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity"
+                  >
+                    <Edit3 className="w-6 h-6 text-white" />
+                    <input
+                      id="photo-upload"
+                      type="file"
+                      accept="image/*"
+                      onChange={handlePhotoUpload}
+                      className="hidden"
+                      disabled={uploadingPhoto}
+                    />
+                  </label>
+                  {uploadingPhoto && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full">
+                      <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  )}
                 </div>
                 <CardTitle className="text-xl">{editForm.fullName || user.email}</CardTitle>
                 <CardDescription className="flex items-center justify-center">
