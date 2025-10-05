@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { MapPin, Clock, User, Users, Bookmark, BookmarkCheck } from "lucide-react";
 import { useState, useEffect } from "react";
 import JobApplicationModal from "./JobApplicationModal";
-import JobMap from "./JobMap";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -136,10 +135,6 @@ const JobCard = ({ jobId, title, company, location, wage, type, description, ski
       </div>
       
       <p className="text-card-foreground mb-4 text-sm leading-relaxed">{description}</p>
-      
-      <div className="mb-4">
-        <JobMap location={location} showInput={true} />
-      </div>
       
       <div className="flex flex-wrap gap-2 mb-4">
         {skills.map((skill, index) => (

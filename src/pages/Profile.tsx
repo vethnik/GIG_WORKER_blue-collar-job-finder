@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import JobApplicationModal from "@/components/JobApplicationModal";
-import JobMap from "@/components/JobMap";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -792,11 +791,6 @@ const Profile = () => {
               </div>
               <Separator />
               <div>
-                <h4 className="font-semibold text-foreground mb-2">Location</h4>
-                <JobMap location={selectedApplicationJob.location} showInput={true} />
-              </div>
-              <Separator />
-              <div>
                 <h4 className="font-semibold text-foreground mb-2">Job Description</h4>
                 <p className="text-sm text-muted-foreground whitespace-pre-wrap">{selectedApplicationJob.description}</p>
               </div>
@@ -832,11 +826,6 @@ const Profile = () => {
               </div>
               <Separator />
               <div>
-                <h4 className="font-semibold text-foreground mb-2">Location</h4>
-                <JobMap location={selectedPostedJob.location} showInput={true} />
-              </div>
-              <Separator />
-              <div>
                 <h4 className="font-semibold text-foreground mb-2">Job Description</h4>
                 <p className="text-sm text-muted-foreground whitespace-pre-wrap">{selectedPostedJob.description}</p>
               </div>
@@ -869,11 +858,6 @@ const Profile = () => {
                 </span>
                 <span className="text-primary font-medium">{selectedSavedJobDetails.wage}</span>
                 <Badge variant="secondary">{selectedSavedJobDetails.type}</Badge>
-              </div>
-              <Separator />
-              <div>
-                <h4 className="font-semibold text-foreground mb-2">Location</h4>
-                <JobMap location={selectedSavedJobDetails.location} showInput={true} />
               </div>
               <Separator />
               <div>
