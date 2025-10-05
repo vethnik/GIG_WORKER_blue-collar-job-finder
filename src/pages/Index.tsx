@@ -10,6 +10,52 @@ const Index = () => {
       <Navbar />
       <Hero />
       
+      {/* About Section */}
+      <section className="py-24 bg-muted/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-6">
+                About Gig Worker
+              </h2>
+              <p className="text-lg text-muted-foreground mb-4">
+                Gig Worker is revolutionizing the way skilled professionals connect with local opportunities. 
+                We bridge the gap between talented workers seeking flexible employment and businesses 
+                looking for reliable, skilled labor.
+              </p>
+              <p className="text-lg text-muted-foreground mb-4">
+                Founded with a mission to empower the gig economy, our platform ensures fair wages, 
+                transparent communication, and secure transactions for all users. Whether you're a 
+                plumber, electrician, carpenter, or any skilled tradesperson, Gig Worker helps you 
+                find meaningful work on your terms.
+              </p>
+              <p className="text-lg text-muted-foreground">
+                For employers, we provide access to a curated network of verified professionals, 
+                making it easier than ever to find the right person for your project quickly and efficiently.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-6">
+              <div className="bg-card p-6 rounded-lg border border-border shadow-card">
+                <div className="text-4xl font-bold text-primary mb-2">50K+</div>
+                <div className="text-muted-foreground">Active Workers</div>
+              </div>
+              <div className="bg-card p-6 rounded-lg border border-border shadow-card">
+                <div className="text-4xl font-bold text-primary mb-2">100K+</div>
+                <div className="text-muted-foreground">Jobs Completed</div>
+              </div>
+              <div className="bg-card p-6 rounded-lg border border-border shadow-card">
+                <div className="text-4xl font-bold text-primary mb-2">200+</div>
+                <div className="text-muted-foreground">Cities Served</div>
+              </div>
+              <div className="bg-card p-6 rounded-lg border border-border shadow-card">
+                <div className="text-4xl font-bold text-primary mb-2">98%</div>
+                <div className="text-muted-foreground">Satisfaction Rate</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section className="py-24 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
