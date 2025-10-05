@@ -47,9 +47,7 @@ const Navbar = () => {
             <Link to="/workers" className="text-foreground hover:text-primary transition-colors">
               Find Workers
             </Link>
-            <a href="/about" className="text-foreground hover:text-primary transition-colors">
-              About
-            </a>
+            <a href="/about" className="text-foreground hover:text-primary transition-colors">About</a>
           </div>
 
           {/* Desktop Auth Buttons */}
