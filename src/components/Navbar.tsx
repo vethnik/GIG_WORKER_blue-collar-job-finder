@@ -1,11 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Menu, X, Briefcase, LogOut } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [profileName, setProfileName] = useState<string>("");
   const {
     user,
     signOut
@@ -13,6 +15,24 @@ const Navbar = () => {
   const {
     toast
   } = useToast();
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (user) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", user.id)
+          .single();
+        
+        if (data?.full_name) {
+          setProfileName(data.full_name);
+        }
+      }
+    };
+    
+    fetchProfile();
+  }, [user]);
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -57,7 +77,7 @@ const Navbar = () => {
                   <Button variant="ghost">Profile</Button>
                 </Link>
                 <span className="text-sm text-muted-foreground">
-                  Welcome, {user.user_metadata?.full_name || user.email}
+                  Welcome, {profileName || user.email}
                 </span>
                 <Button variant="ghost" onClick={handleSignOut}>
                   <LogOut className="w-4 h-4 mr-2" />
@@ -99,7 +119,7 @@ const Navbar = () => {
                       </Button>
                     </Link>
                     <div className="px-3 py-2 text-sm text-muted-foreground">
-                      Welcome, {user.user_metadata?.full_name || user.email}
+                      Welcome, {profileName || user.email}
                     </div>
                     <Button variant="ghost" className="w-full" onClick={handleSignOut}>
                       <LogOut className="w-4 h-4 mr-2" />
