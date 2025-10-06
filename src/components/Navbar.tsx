@@ -15,22 +15,17 @@ const Navbar = () => {
   const {
     toast
   } = useToast();
-
   useEffect(() => {
     const fetchProfile = async () => {
       if (user) {
-        const { data } = await supabase
-          .from("profiles")
-          .select("full_name")
-          .eq("id", user.id)
-          .single();
-        
+        const {
+          data
+        } = await supabase.from("profiles").select("full_name").eq("id", user.id).single();
         if (data?.full_name) {
           setProfileName(data.full_name);
         }
       }
     };
-    
     fetchProfile();
   }, [user]);
   const handleSignOut = async () => {
@@ -67,7 +62,7 @@ const Navbar = () => {
             <Link to="/workers" className="text-foreground hover:text-primary transition-colors">
               Find Workers
             </Link>
-            <a href="/about" className="text-foreground hover:text-primary transition-colors">About</a>
+            
           </div>
 
           {/* Desktop Auth Buttons */}
