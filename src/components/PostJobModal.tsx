@@ -33,7 +33,6 @@ const PostJobModal = ({ open, onOpenChange, onJobPosted }: PostJobModalProps) =>
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [geocoding, setGeocoding] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     company: "",
@@ -78,31 +77,6 @@ const PostJobModal = ({ open, onOpenChange, onJobPosted }: PostJobModalProps) =>
         ? validated.skills.split(",").map((s) => s.trim()).filter(Boolean)
         : [];
 
-      // Geocode the location
-      setGeocoding(true);
-      let latitude: number | null = null;
-      let longitude: number | null = null;
-
-      try {
-        const { data: geocodeData, error: geocodeError } = await supabase.functions.invoke('geocode-location', {
-          body: { location: validated.location }
-        });
-
-        if (!geocodeError && geocodeData) {
-          latitude = geocodeData.latitude;
-          longitude = geocodeData.longitude;
-          
-          if (!latitude || !longitude) {
-            console.warn('Geocoding returned no coordinates for:', validated.location);
-          }
-        }
-      } catch (geocodeError) {
-        console.error('Geocoding failed:', geocodeError);
-        // Continue without coordinates - don't block job posting
-      } finally {
-        setGeocoding(false);
-      }
-
       const { error } = await supabase.from("jobs").insert({
         user_id: user.id,
         title: validated.title,
@@ -114,8 +88,6 @@ const PostJobModal = ({ open, onOpenChange, onJobPosted }: PostJobModalProps) =>
         category: validated.category,
         skills: skillsArray,
         positions_available: validated.positions_available,
-        latitude,
-        longitude,
       });
 
       if (error) throw error;
@@ -305,7 +277,7 @@ const PostJobModal = ({ open, onOpenChange, onJobPosted }: PostJobModalProps) =>
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {geocoding ? "Finding location..." : loading ? "Posting..." : "Post Job"}
+              {loading ? "Posting..." : "Post Job"}
             </Button>
           </div>
         </form>

@@ -50,9 +50,7 @@ export type Database = {
           created_at: string
           description: string
           id: string
-          latitude: number | null
           location: string
-          longitude: number | null
           positions_available: number
           positions_filled: number
           skills: string[] | null
@@ -68,9 +66,7 @@ export type Database = {
           created_at?: string
           description: string
           id?: string
-          latitude?: number | null
           location: string
-          longitude?: number | null
           positions_available?: number
           positions_filled?: number
           skills?: string[] | null
@@ -86,9 +82,7 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
-          latitude?: number | null
           location?: string
-          longitude?: number | null
           positions_available?: number
           positions_filled?: number
           skills?: string[] | null
@@ -170,10 +164,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      calculate_distance: {
-        Args: { lat1: number; lat2: number; lon1: number; lon2: number }
-        Returns: number
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never

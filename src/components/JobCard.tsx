@@ -5,7 +5,6 @@ import JobApplicationModal from "./JobApplicationModal";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { formatDistance } from "@/lib/distance";
 
 interface JobCardProps {
   jobId: string;
@@ -19,10 +18,9 @@ interface JobCardProps {
   postedTime: string;
   positionsAvailable: number;
   positionsFilled: number;
-  distance?: number | null;
 }
 
-const JobCard = ({ jobId, title, company, location, wage, type, description, skills, postedTime, positionsAvailable, positionsFilled, distance }: JobCardProps) => {
+const JobCard = ({ jobId, title, company, location, wage, type, description, skills, postedTime, positionsAvailable, positionsFilled }: JobCardProps) => {
   const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
@@ -127,10 +125,7 @@ const JobCard = ({ jobId, title, company, location, wage, type, description, ski
       
       <div className="flex items-center text-muted-foreground mb-3 flex-wrap gap-y-1">
         <MapPin className="w-4 h-4 mr-1" />
-        <span className="text-sm">
-          {location}
-          {distance && <span className="ml-1 text-primary font-medium">• {formatDistance(distance)}</span>}
-        </span>
+        <span className="text-sm">{location}</span>
         <Clock className="w-4 h-4 ml-4 mr-1" />
         <span className="text-sm">{postedTime}</span>
         <Users className="w-4 h-4 ml-4 mr-1" />
