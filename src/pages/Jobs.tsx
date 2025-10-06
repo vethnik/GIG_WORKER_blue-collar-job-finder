@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Search, Filter, MapPin, Plus } from "lucide-react";
+import React, { useState, useEffect, useMemo } from "react";
+import { Search, Filter, MapPin, Plus, Navigation } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import JobCard from "@/components/JobCard";
@@ -9,6 +9,8 @@ import PostJobModal from "@/components/PostJobModal";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { calculateDistance } from "@/lib/distance";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Jobs = () => {
   const { user } = useAuth();
@@ -19,6 +21,11 @@ const Jobs = () => {
   const [isPostJobModalOpen, setIsPostJobModalOpen] = useState(false);
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sortBy, setSortBy] = useState<'recent' | 'pay' | 'distance'>('recent');
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationPermission, setLocationPermission] = useState<'granted' | 'denied' | 'prompt' | null>(null);
+  const [showLocationBanner, setShowLocationBanner] = useState(false);
+  const [radiusFilter, setRadiusFilter] = useState<number | null>(null);
 
   // Define filter categories
   const categories = [
@@ -32,7 +39,48 @@ const Jobs = () => {
 
   useEffect(() => {
     fetchJobs();
+    requestUserLocation();
   }, []);
+
+  const requestUserLocation = () => {
+    const locationPref = localStorage.getItem('locationPermission');
+    
+    if (locationPref === 'denied') {
+      setLocationPermission('denied');
+      return;
+    }
+
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+          setLocationPermission('granted');
+          localStorage.setItem('locationPermission', 'granted');
+        },
+        (error) => {
+          console.error('Error getting location:', error);
+          setLocationPermission('denied');
+          setShowLocationBanner(true);
+        }
+      );
+    } else {
+      setLocationPermission('denied');
+    }
+  };
+
+  const handleEnableLocation = () => {
+    localStorage.removeItem('locationPermission');
+    setShowLocationBanner(false);
+    requestUserLocation();
+  };
+
+  const handleDismissBanner = () => {
+    setShowLocationBanner(false);
+    localStorage.setItem('locationPermission', 'denied');
+  };
 
   const fetchJobs = async () => {
     try {
@@ -59,29 +107,59 @@ const Jobs = () => {
     fetchJobs();
   };
 
-  // Filter jobs based on selected category and search term
-  const filteredJobs = jobs.filter((job) => {
-    const matchesCategory =
-      selectedCategory === "All Jobs" ||
-      job.category === selectedCategory ||
-      job.title.toLowerCase().includes(selectedCategory.toLowerCase());
+  // Filter and sort jobs
+  const filteredJobs = useMemo(() => {
+    return jobs
+      .map((job) => ({
+        ...job,
+        distance:
+          userLocation && job.latitude && job.longitude
+            ? calculateDistance(userLocation.lat, userLocation.lng, job.latitude, job.longitude)
+            : null,
+      }))
+      .filter((job) => {
+        const matchesCategory =
+          selectedCategory === "All Jobs" ||
+          job.category === selectedCategory ||
+          job.title.toLowerCase().includes(selectedCategory.toLowerCase());
 
-    const matchesSearch =
-      searchTerm === "" ||
-      job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      job.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (job.skills &&
-        job.skills.some((skill: string) =>
-          skill.toLowerCase().includes(searchTerm.toLowerCase())
-        ));
+        const matchesSearch =
+          searchTerm === "" ||
+          job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          job.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (job.skills &&
+            job.skills.some((skill: string) =>
+              skill.toLowerCase().includes(searchTerm.toLowerCase())
+            ));
 
-    const matchesLocation =
-      locationFilter === "" ||
-      job.location.toLowerCase().includes(locationFilter.toLowerCase());
+        const matchesLocation =
+          locationFilter === "" ||
+          job.location.toLowerCase().includes(locationFilter.toLowerCase());
 
-    return matchesCategory && matchesSearch && matchesLocation;
-  });
+        const matchesRadius =
+          !radiusFilter || !job.distance || job.distance <= radiusFilter;
+
+        return matchesCategory && matchesSearch && matchesLocation && matchesRadius;
+      })
+      .sort((a, b) => {
+        if (sortBy === 'distance' && a.distance && b.distance) {
+          return a.distance - b.distance;
+        }
+        if (sortBy === 'recent') {
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        }
+        if (sortBy === 'pay') {
+          // Best effort wage parsing
+          const getWageNum = (wage: string) => {
+            const match = wage.match(/\d+/);
+            return match ? parseInt(match[0]) : 0;
+          };
+          return getWageNum(b.wage) - getWageNum(a.wage);
+        }
+        return 0;
+      });
+  }, [jobs, selectedCategory, searchTerm, locationFilter, radiusFilter, sortBy, userLocation]);
 
   const getTimeAgo = (timestamp: string) => {
     const now = new Date();
@@ -126,6 +204,26 @@ const Jobs = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Location Banner */}
+        {showLocationBanner && (
+          <Alert className="mb-6 bg-primary/5 border-primary/20">
+            <Navigation className="h-4 w-4" />
+            <AlertDescription className="flex items-center justify-between">
+              <span>
+                📍 Enable location to see jobs closest to you and sort by distance
+              </span>
+              <div className="flex gap-2 ml-4">
+                <Button size="sm" onClick={handleEnableLocation}>
+                  Enable Location
+                </Button>
+                <Button size="sm" variant="outline" onClick={handleDismissBanner}>
+                  Dismiss
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Search and Filters */}
         <div className="mb-8">
           <div className="flex flex-col md:flex-row gap-4 mb-6">
@@ -167,22 +265,46 @@ const Jobs = () => {
               </Button>
             ))}
           </div>
+
+          {/* Distance Filter */}
+          {userLocation && (
+            <div className="mt-4 flex flex-wrap gap-2 items-center">
+              <span className="text-sm text-muted-foreground">Distance from you:</span>
+              {[5, 10, 25, null].map((radius) => (
+                <Button
+                  key={radius || 'all'}
+                  variant={radiusFilter === radius ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setRadiusFilter(radius)}
+                >
+                  {radius ? `Within ${radius}km` : 'Any distance'}
+                </Button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Results Info */}
         <div className="flex justify-between items-center mb-6">
           <p className="text-muted-foreground">
-            Showing {filteredJobs.length} jobs in your area
+            Showing {filteredJobs.length} jobs
+            {radiusFilter && ` within ${radiusFilter}km`}
             {selectedCategory !== "All Jobs" && (
               <span className="ml-2 text-primary">
                 • Filtered by {selectedCategory}
               </span>
             )}
           </p>
-          <select className="bg-background border border-border rounded-md px-3 py-2 text-sm">
-            <option>Most Recent</option>
-            <option>Highest Pay</option>
-            <option>Closest Distance</option>
+          <select 
+            className="bg-background border border-border rounded-md px-3 py-2 text-sm"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as 'recent' | 'pay' | 'distance')}
+          >
+            <option value="recent">Most Recent</option>
+            <option value="pay">Highest Pay</option>
+            <option value="distance" disabled={!userLocation}>
+              Closest Distance {!userLocation && '(Enable location)'}
+            </option>
           </select>
         </div>
 
@@ -207,12 +329,14 @@ const Jobs = () => {
                 postedTime={getTimeAgo(job.created_at)}
                 positionsAvailable={job.positions_available || 1}
                 positionsFilled={job.positions_filled || 0}
+                distance={job.distance}
               />
             ))
           ) : (
             <div className="col-span-full text-center py-12">
               <p className="text-muted-foreground text-lg mb-4">
                 No jobs found matching your criteria
+                {radiusFilter && ` within ${radiusFilter}km`}
               </p>
               <Button 
                 variant="outline" 
@@ -220,6 +344,7 @@ const Jobs = () => {
                   setSelectedCategory("All Jobs");
                   setSearchTerm("");
                   setLocationFilter("");
+                  setRadiusFilter(null);
                 }}
               >
                 Clear Filters
