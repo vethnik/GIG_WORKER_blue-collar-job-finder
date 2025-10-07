@@ -126,6 +126,12 @@ export default {
         'elegant': 'var(--shadow-elegant)',
         'glow': 'var(--shadow-glow)',
         'card': 'var(--shadow-card)',
+        'neon-blue': 'var(--shadow-neon-blue)',
+        'neon-purple': 'var(--shadow-neon-purple)',
+        'neon-pink': 'var(--shadow-neon-pink)',
+      },
+      backdropBlur: {
+        'glass': '20px',
       },
     },
   },
